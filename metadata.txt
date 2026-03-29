@@ -1,0 +1,17 @@
+[general]
+name=Label Mover
+qgisMinimumVersion=3.28
+description=印刷レイアウト上でフィーチャのラベルをテキストアイテムとして自由に配置・編集できるプラグイン
+version=1.0.0
+author=akahane noriaki
+email=akahane.noriaki@gmail.com
+about=QGISの印刷レイアウト上で、ベクターレイヤーのラベルをテキストアイテムとして追加し、自由にドラッグ移動できます。フォント・色・バッファー（ハロー）の一括設定、重なりチェック、レイアウト画面上のツールバーからの操作など、印刷向けラベル編集に特化した機能を提供します。
+tracker=https://github.com/akahane-noriaki/label_mover/issues
+repository=https://github.com/akahane-noriaki/label_mover
+hasProcessingProvider=no
+tags=label,layout,print,text
+homepage=https://github.com/akahane-noriaki/label_mover
+category=Plugins
+icon=
+experimental=False
+deprecated=False
