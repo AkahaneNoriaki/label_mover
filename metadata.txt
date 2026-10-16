@@ -1,6 +1,7 @@
 [general]
 name=Label Mover
 qgisMinimumVersion=3.28
+supportsQt6=True
 description=印刷レイアウト上でフィーチャのラベルをテキストアイテムとして自由に配置・編集できるプラグイン
 version=1.0.0
 author=akahane noriaki

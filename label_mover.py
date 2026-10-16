@@ -2,12 +2,16 @@
 # プラグインのメインコードです。
 
 from qgis.PyQt.QtWidgets import (
-    QAction, QMessageBox, QColorDialog,
+    QMessageBox, QColorDialog,
     QDialog, QVBoxLayout, QHBoxLayout, QLabel,
     QSpinBox, QDoubleSpinBox, QPushButton, QDialogButtonBox,
     QCheckBox, QGroupBox
 )
 from qgis.PyQt.QtGui import QColor
+try:  # Qt6 (QGIS 4): QAction は QtGui へ移動
+    from qgis.PyQt.QtGui import QAction
+except ImportError:  # Qt5 (QGIS 3)
+    from qgis.PyQt.QtWidgets import QAction
 from qgis.core import (
     QgsProject,
     QgsLayoutItemLabel,
@@ -23,6 +27,15 @@ from qgis.core import (
     QgsTextBufferSettings,
     QgsFeatureRequest,
 )
+
+# QGIS 3.28 / QGIS 4 両対応：単位の列挙型
+try:
+    from qgis.core import Qgis
+    _RENDER_MM = Qgis.RenderUnit.Millimeters
+    _LAYOUT_MM = Qgis.LayoutUnit.Millimeters
+except (ImportError, AttributeError):
+    _RENDER_MM = QgsUnitTypes.RenderMillimeters
+    _LAYOUT_MM = QgsUnitTypes.LayoutMillimeters
 
 
 class TextStyleDialog(QDialog):
@@ -97,7 +110,9 @@ class TextStyleDialog(QDialog):
         buffer_group.setLayout(buffer_layout)
         layout.addWidget(buffer_group)
 
-        buttons = QDialogButtonBox(QDialogButtonBox.Ok | QDialogButtonBox.Cancel)
+        buttons = QDialogButtonBox(
+            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
+        )
         buttons.accepted.connect(self.accept)
         buttons.rejected.connect(self.reject)
         layout.addWidget(buttons)
@@ -359,7 +374,7 @@ class LabelMoverPlugin:
             return
 
         dlg = TextStyleDialog(self._get_parent_window())
-        if dlg.exec_() != QDialog.Accepted:
+        if dlg.exec() != QDialog.DialogCode.Accepted:
             return
 
         s = dlg.get_settings()
@@ -376,7 +391,7 @@ class LabelMoverPlugin:
             buffer_settings = QgsTextBufferSettings()
             buffer_settings.setEnabled(s["buffer_enabled"])
             buffer_settings.setSize(s["buffer_size"])
-            buffer_settings.setSizeUnit(QgsUnitTypes.RenderMillimeters)
+            buffer_settings.setSizeUnit(_RENDER_MM)
             buffer_settings.setColor(s["buffer_color"])
             text_format.setBuffer(buffer_settings)
 
@@ -396,9 +411,9 @@ class LabelMoverPlugin:
             self._get_parent_window(),
             "Label Mover",
             "レイアウトのテキストアイテムを全て削除し、元のラベルを再表示します。\nよろしいですか？",
-            QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
         )
-        if reply != QMessageBox.Yes:
+        if reply != QMessageBox.StandardButton.Yes:
             return
 
         layout = self._get_active_layout()
@@ -641,5 +656,5 @@ class LabelMoverPlugin:
 
         label_item.adjustSizeToText()
         x_mm, y_mm = layout_pos
-        label_item.attemptMove(QgsLayoutPoint(x_mm + 2, y_mm - 5, QgsUnitTypes.LayoutMillimeters))
+        label_item.attemptMove(QgsLayoutPoint(x_mm + 2, y_mm - 5, _LAYOUT_MM))
         label_item.refresh()
